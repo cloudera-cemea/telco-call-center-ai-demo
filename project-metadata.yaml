@@ -1,0 +1,142 @@
+name: Telco Call Center AI Demo
+short_summary: Telco Call Center AI Demo
+description: Telco Call Center AI Demo
+author: mengelhardt@cloudera.com
+date: "2024-11-01"
+specification_version: "0.1"
+prototype_version: "1.0"
+
+# required and optional environment variables block
+# -------------------------------------------------
+
+environment_variables:
+  DATA_CONNECTION_NAME:
+    default: ""
+    description: "Name of Spark Data Lake connection for demo data population. If you are not sure, contact the administrator of the workspace."
+    required: true
+  DEMO_DATABASE_NAME:
+    default: "telco_call_center_ai"
+    description: "Name of the database containing the demo data."
+    required: false
+  DEMO_TABLE_NAME:
+    default: "customer_info"
+    description: "Name of the table containing the demo data."
+    required: false
+  OPENAI_API_KEY:
+    default: ""
+    description: OpenAI API key for the model endpoint. Required.
+    required: true
+  WORKLOAD_PASSWORD:
+    default: ""
+    description: Workload password of the Cloudera user deploying the project. Required to read/write data from/to the Data Lake.
+    required: true
+  AI_MODEL_ACCESS_KEY:
+    default: ""
+    description: AI model access key/identifier. Autopopulated during deployment. Leave blank.
+    required: false
+  SENTINMENT_MODEL_ACCESS_KEY:
+    default: ""
+    description: Sentiment model access key/identifier. Autopopulated during deployment. Leave blank.
+    required: false
+
+# runtimes for all workloads
+# --------------------------
+
+runtimes:
+  - editor: JupyterLab
+    kernel: Python 3.10
+    edition: Standard
+    version: "2024.10"
+    addons:
+      - Spark 3.2.3 - CDE 1.20.3 - HOTFIX-2
+
+tasks:
+
+  # populate demo data block
+  # ------------------------
+  - type: create_job
+    name: populate demo data
+    script: data.py
+    entity_label: populate-data
+    short_summary: Create job to populate demo data.
+    kernel: python3
+    cpu: 2
+    memory: 4
+
+  - type: run_job
+    entity_label: populate-data
+    short summary: Run job to populate demo data.
+
+  # sentiment model deployment block
+
+  # --------------------------------
+
+  - type: create_model
+    short_summary: create sentiment model
+    name: sentiment analysis model
+    entity_label: sentiment-model
+    access_key_environment_variable: SENTIMENT_MODEL_ACCESS_KEY
+    default_resources:
+      cpu: 2
+      memory: 8
+
+  - type: build_model
+    short_summary: build sentiment model
+    entity_label: sentiment-model
+    target_file_path: sentiment_model.py
+    target_function_name: predict
+    kernel: python3
+    examples:
+      - request:
+          text: I love hackathons!
+        response:
+          text: I love hackathons!
+          negative: 0.0042450143955647945
+          neutral: 0.011172760277986526
+          positive: 0.984582245349884
+          label: positive
+
+  - type: deploy_model
+    short_summary: deploy sentiment model
+    entity_label: sentiment-model
+
+  # llm model deployment block
+  # --------------------------
+
+  - type: create_model
+    short_summary: create ai model
+    name: ai model
+    entity_label: ai-model
+    access_key_environment_variable: AI_MODEL_ACCESS_KEY
+    default_resources:
+      cpu: 2
+      memory: 8
+
+  - type: build_model
+    short_summary: build ai model
+    entity_label: ai-model
+    target_file_path: ai_model.py
+    target_function_name: predict
+    kernel: python3
+    examples:
+      - request:
+          task: ai_help
+          text: I am having troubles with my internet connection.
+        response:
+          recommendationText: I'm sorry to hear that you're having trouble with your internet connection. Have you tried restarting your modem/router to see if that helps improve the connection?
+
+  - type: deploy_model
+    short_summary: deploy ai model
+    entity_label: ai-model
+
+  # frontent application deployment block
+  # -------------------------------------
+
+  - type: start_application
+    bypass_authentication: true
+    subdomain: telco-call-center-ai
+    static_subdomain: true
+    script: webapp.py
+    kernel: python3
+    cpu: 4
+    memory: 8

@@ -1,0 +1,637 @@
+<!doctype html>
+<html lang="en" data-bs-theme="dark">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Telco Call Center AI Demo</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* Style for the floating record button */
+        #recordButton {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background-color: #dc3546aa;
+            /* Red color */
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        /* Hover style for the button */
+        #recordButton:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 1);
+        }
+
+        /* Style for the floating settings button */
+        #settingsButton {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 30px;
+            height: 30px;
+            border: none;
+            background-color: transparent;
+            /* Transparent background */
+            color: rgba(255, 255, 255, 0.7);
+            /* 70% opaque white */
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        /* Style for the delete icon */
+        .delete-icon {
+            color: #dc3545;
+            /* Red color */
+            cursor: pointer;
+            margin-left: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container mt-4 mb-4">
+        <h1>Airwave Contact Center</h1>
+        <p>Maintained by <a href="mailto:mengelhardt@cloudera.com">mengelhardt@cloudera.com</a>, hosted on CDP Public Cloud Demos</p>
+        <p>To start, press enter key or click the record button in the bottom right hand corner. To change settings,
+            click on the settings icon in the top righthand corner.</p>
+        <div class="row">
+            <div class="col-md-8">
+                <div id="conversationContent">
+                </div>
+            </div>
+            <div class="col-md-4 mt-auto mb-2">
+                <div id="customerInfo">
+                    <div class="h-100 p-3 bg-body-tertiary border rounded-3 mb-2">
+                        <h2>Customer Info</h2>
+                        <p>Info will be automatically added once customer mentioned name, street address and date of
+                            birth.</p>
+                        <table class="table table-sm mb-2">
+                            <thead>
+                            <tbody>
+                                <tr>
+                                    <td scope="row">Name</td>
+                                    <td id="customerName"></td>
+                                </tr>
+                                <tr>
+                                    <td scope="row">Address</td>
+                                    <td id="customerAddress"></td>
+                                </tr>
+                                <tr>
+                                    <td scope="row">Date of birth</td>
+                                    <td id="customerDob"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <div id="customerInfoFromDb"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <button id="getSummaryButton" class="btn btn-primary mb-2" onclick="getAiSummary(this)"
+            style="display: none;">Summarize this conversation</button>
+        <div id="conversationSummary" class="mb-2"></div>
+    </div>
+
+    <!-- Floating record button -->
+    <button id="recordButton" class="btn">
+        <span>&#9899;</span>
+    </button>
+
+    <!-- Floating settings button -->
+    <button id="settingsButton" data-bs-toggle="modal" data-bs-target="#exampleModal" type="button">
+        <i class="fas fa-cog"></i>
+    </button>
+
+    <!-- Modal -->
+    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="exampleModalLabel">Settings</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckDefault"
+                            onchange="contRecoding(this)">
+                        <label class="form-check-label" for="flexSwitchCheckDefault">Continous recording (enabling this
+                            on laptop/desktop browsers works great for capturing entire conversations. Just do a quick
+                            pause between speakers. Hoewever, this feature may not work correctly on mobile
+                            devices.)</label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var recording = false;
+        var customerInfoComplete = false;
+        var customerInfoContext = '';
+
+        var charts = {};
+
+        const startButton = document.getElementById('recordButton');
+        const conversationDiv = document.getElementById('conversationContent');
+
+        const recognition = new webkitSpeechRecognition() || new SpeechRecognition();
+        recognition.interimResults = true;
+
+        // enabling this on laptob works great for recording an entire conversation without having to click the button
+        // However it leads to issues on mobile so keeping it off is ok trade off to keep ux the same
+        recognition.continuous = false;
+
+        function contRecoding(switchElem) {
+            if (switchElem.checked == true) {
+                recognition.continuous = true;
+            } else {
+                recognition.continuous = false;
+            }
+        }
+
+        var counterID = 0;
+
+        function recordButtonClick() {
+            if (recording == false) {
+                recording = true;
+                recognition.start();
+                startButton.style.backgroundColor = '#f5070b';
+                createDiv(counterID);
+            } else {
+                recognition.stop();
+            }
+        }
+
+        // Function to handle the keydown event
+        function handleKeyPress(event) {
+            // Check if the pressed key is the enter key (key code 13)
+            if (event.keyCode === 13) {
+                // Prevent the default behavior of the space key (e.g., scrolling the page)
+                event.preventDefault();
+
+                // Trigger the button click function
+                recordButtonClick();
+            }
+        }
+
+        startButton.addEventListener('click', recordButtonClick);
+
+        // Attach the keydown event to the document
+        document.addEventListener('keydown', handleKeyPress);
+
+
+        // function to create new div and append to conversation
+        function createDiv(id) {
+            // Create a new div element
+            var newDiv = document.createElement('div');
+
+            // Set the id for the new div
+            newDiv.id = id;
+
+            // Set the class for the new div
+            newDiv.className = 'h-100 p-3 bg-body-tertiary border rounded-3 mb-3';
+
+            // Set the HTML content of the new div
+            newDiv.innerHTML = `<div class="row"><div class="col-8"><h2 id="textOfConvDiv${id}" contenteditable="true"></h2></div>` +
+                `<div class="col-4"><div><canvas id="chart${id}"></canvas></div></div></div>` +
+                `<button class="btn btn-light" type="button" onclick="getAiHelp(${id}, this)">I need AI help</button>` +
+                '<button class="btn btn-outline-secondary delete-icon" onclick="deleteDiv(this)"><i class="fas fa-trash-alt"></i></button>';
+
+            // Set the new div to be initially hidden
+            newDiv.style.display = 'none';
+
+            // Append the new div to the existing div with id "conversationContent"
+            document.getElementById('conversationContent').appendChild(newDiv);
+
+            // scroll to div
+            var element = document.getElementById('conversationContent');
+            element.scrollIntoView({ block: "end" });
+
+            createNewChart(id);
+        }
+
+        // function to change text of div of conversation
+        function changeText(id, text) {
+            if (text != '') {
+                document.getElementById(id).style.display = 'block';
+                document.getElementById(`textOfConvDiv${id}`).innerText = text;
+                document.getElementById(id).scrollIntoView({ block: "end" });
+
+                // get summary button and check if its set to dsiplay none
+                // set to displack block if it's none
+                var getSummaryButton = document.getElementById('getSummaryButton');
+                if (getSummaryButton.style.display == 'none') {
+                    getSummaryButton.style.display = 'block';
+                }
+            }
+
+        }
+
+        recognition.onresult = event => {
+
+            var fullTranscriptText = '';
+            var interimTranscriptText = '';
+            var done = false;
+
+            // get lowest index that actually changed
+            var startIndex = event.resultIndex;
+
+            for (i = startIndex; i < event.results.length; i++) {
+                result = event.results[i];
+                if (result.isFinal) {
+                    if (result[0].transcript != '') {
+                        fullTranscriptText = fullTranscriptText.concat(result[0].transcript, " ");
+                        if (i + 1 == event.results.length) {
+                            done = true;
+                        }
+                    }
+
+                } else {
+                    if (result[0].transcript != '') {
+                        interimTranscriptText = interimTranscriptText.concat(result[0].transcript, " ");
+                    }
+                }
+            }
+
+            if (interimTranscriptText != '') {
+                var interimSentiments = getSentimentForText(interimTranscriptText, counterID);
+            }
+
+            if (fullTranscriptText != '' && done) {
+                var fullSentiments = getSentimentForText(fullTranscriptText, counterID);
+            }
+
+            if (done == true) {
+                changeText(counterID, fullTranscriptText);
+                if (customerInfoComplete == false) {
+                    getCustomerInfo();
+                }
+                counterID += 1;
+                createDiv(counterID);
+            } else {
+                changeText(counterID, interimTranscriptText);
+            }
+        };
+
+        recognition.onend = () => {
+            startButton.style.backgroundColor = '#dc3546aa';
+            recording = false;
+            counterID += 1;
+        };
+
+        recognition.onerror = event => {
+            console.error('Speech recognition error:', event.error);
+        };
+
+        recognition.onnomatch = () => {
+            console.log('No speech was recognized.');
+        };
+
+        // asynchronous function to get sentiment for text
+        async function getSentimentForText(textInput, id) {
+            try {
+                // Get the current timestamp in the required format
+                const currentTimestamp = new Date().toISOString();
+
+                // Create a JSON object with the required content, including the accessKey
+                const dataToSend = {
+                    "accessKey": "ms1cm6ibebv29xmy2xmdz3t9chbzifhy",
+                    "request": {
+                        "created_at": currentTimestamp,
+                        "id": "999",
+                        "text": textInput
+                    }
+                };
+
+                // Make an asynchronous request using the fetch API
+                const response = await fetch('https://modelservice.ml-dbfc64d1-783.go01-dem.ylcu-atmi.cloudera.site/model', {
+                    method: 'POST',
+                    headers: {
+                        "Accept": "*/*",
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(dataToSend),
+                });
+
+                // Parse the JSON response
+                const responseData = await response.json();
+
+                // Access the "label" attribute from the response and display it in the HTML
+                const labelValue = responseData.response.label;
+                const negativeVal = responseData.response.negative;
+                const neutralVal = responseData.response.neutral;
+                const positiveVal = responseData.response.positive;
+                charts[id].data.datasets[0].data = [negativeVal, neutralVal, positiveVal];
+                charts[id].update();
+
+            } catch (error) {
+                // Handle any errors that occur during the process
+                console.error('Error fetching data:', error);
+            }
+        }
+
+        function getTextOfEntireConversation() {
+            text = '';
+            for (i = 0; i <= counterID; i++) {
+                elem = document.getElementById(`textOfConvDiv${i}`);
+                if (elem) {
+                    text = text.concat(elem.innerText, " ");
+                }
+            }
+
+            if (customerInfoContext != '') {
+                text = text.concat(JSON.stringify(customerInfoContext));
+            }
+
+            return text
+        }
+
+        async function getAiHelp(id, buttonElem) {
+            buttonElem.innerHTML = '<span class="spinner-grow spinner-grow-sm" aria-hidden="true"></span> ' +
+                '<span role="status">Loading...</span>'
+            var textOfThatDiv = document.getElementById(`textOfConvDiv${id}`).innerText;
+            var textOfEntireConversation = getTextOfEntireConversation();
+
+            var textInput = `Here is the entire conversation: ${textOfEntireConversation}, and I need help with this section: ${textOfThatDiv}`
+
+            try {
+                // Get the current timestamp in the required format
+                const currentTimestamp = new Date().toISOString();
+
+                // Create a JSON object with the required content, including the accessKey
+                const dataToSend = {
+                    "accessKey": "{{AI_MODEL_ACCESS_KEY}}",
+                    "request": {
+                        "created_at": currentTimestamp,
+                        "text": textInput,
+                        "task": "ai_help"
+                    }
+                };
+
+                // Make an asynchronous request using the fetch API
+                const response = await fetch('https://modelservice.ml-dbfc64d1-783.go01-dem.ylcu-atmi.cloudera.site/model', {
+                    method: 'POST',
+                    headers: {
+                        "Accept": "*/*",
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(dataToSend),
+                });
+
+                // Parse the JSON response
+                const responseData = await response.json();
+
+                // Access the "label" attribute from the response and display it in the HTML
+                const responseText = responseData.response.recommendationText;
+                var newDiv = document.createElement('div');
+                newDiv.innerHTML = `<h4 class="mt-3"  style="font-style:italic">${responseText}</h4>`
+                document.getElementById(id).appendChild(newDiv);
+
+                buttonElem.innerHTML = 'Ask AI again';
+
+            } catch (error) {
+                // Handle any errors that occur during the process
+                console.error('Error fetching data:', error);
+            }
+        }
+
+        async function getAiSummary(buttonElem) {
+            buttonElem.innerHTML = '<span class="spinner-grow spinner-grow-sm" aria-hidden="true"></span> ' +
+                '<span role="status">Loading...</span>'
+            var textOfEntireConversation = getTextOfEntireConversation();
+
+            var textInput = `Here is the entire conversation: ${textOfEntireConversation}, please summarize.`
+
+            try {
+                // Get the current timestamp in the required format
+                const currentTimestamp = new Date().toISOString();
+
+                // Create a JSON object with the required content, including the accessKey
+                const dataToSend = {
+                    "accessKey": "{{AI_MODEL_ACCESS_KEY}}",
+                    "request": {
+                        "created_at": currentTimestamp,
+                        "text": textInput,
+                        "task": "summarize"
+                    }
+                };
+
+                // Make an asynchronous request using the fetch API
+                const response = await fetch('https://modelservice.ml-dbfc64d1-783.go01-dem.ylcu-atmi.cloudera.site/model', {
+                    method: 'POST',
+                    headers: {
+                        "Accept": "*/*",
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(dataToSend),
+                });
+
+                // Parse the JSON response
+                const responseData = await response.json();
+
+                // Access the "label" attribute from the response and display it in the HTML
+                const responseText = responseData.response.recommendationText;
+                var summaryDiv = document.getElementById('conversationSummary');
+                summaryDiv.innerHTML = `<p style="font-style:italic">${responseText}</p>`
+
+                buttonElem.innerHTML = 'Summarize again';
+
+            } catch (error) {
+                // Handle any errors that occur during the process
+                console.error('Error fetching data:', error);
+            }
+        }
+
+        function isValidDate(dateString) {
+            // Check if the string is in "YYYY-MM-DD" format
+            var dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+            if (!dateRegex.test(dateString)) {
+                return false;
+            }
+
+            // Further validate as a valid date
+            var dateObj = new Date(dateString);
+            var isValid = !isNaN(dateObj) && dateObj.toISOString().slice(0, 10) === dateString;
+            return isValid;
+        }
+
+        function createTable(data, divId) {
+            const tableContainer = document.getElementById(divId);
+            const table = document.createElement('table');
+            table.className = 'table table-sm mb-2';
+            const tbody = document.createElement('tbody');
+
+            for (const key in data) {
+                if (data.hasOwnProperty(key)) {
+                    const tr = document.createElement('tr');
+
+                    const td1 = document.createElement('td');
+                    td1.textContent = key.replace(/_/g,' ');
+                    tr.appendChild(td1);
+
+                    const td2 = document.createElement('td');
+                    td2.textContent = data[key];
+                    tr.appendChild(td2);
+
+                    tbody.appendChild(tr);
+                }
+            }
+
+            table.appendChild(tbody);
+
+            tableContainer.appendChild(table);
+        }
+
+        async function getCustomerInfo() {
+            var textOfEntireConversation = getTextOfEntireConversation();
+
+            var textInput = `Here is the entire conversation: ${textOfEntireConversation}.`
+
+            try {
+                // Get the current timestamp in the required format
+                const currentTimestamp = new Date().toISOString();
+
+                // Create a JSON object with the required content, including the accessKey
+                const dataToSend = {
+                    "accessKey": "{{AI_MODEL_ACCESS_KEY}}",
+                    "request": {
+                        "created_at": currentTimestamp,
+                        "text": textInput,
+                        "task": "getCustomerInfo"
+                    }
+                };
+
+                // Make an asynchronous request using the fetch API
+                const response = await fetch('https://modelservice.ml-dbfc64d1-783.go01-dem.ylcu-atmi.cloudera.site/model', {
+                    method: 'POST',
+                    headers: {
+                        "Accept": "*/*",
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(dataToSend),
+                });
+
+                try {
+                    // Parse the JSON response
+                    const responseData = await response.json();
+
+                    // Access the "label" attribute from the response and display it in the HTML
+                    const responseObj = JSON.parse(responseData.response.recommendationText);
+
+                    if (responseObj.hasOwnProperty("name") && responseObj.name != "") {
+                        document.getElementById("customerName").innerHTML = responseObj.name;
+                        customerInfoComplete = true;
+                    } else {
+                        customerInfoComplete = false;
+                    }
+                    if (responseObj.hasOwnProperty("address") && responseObj.address != "") {
+                        document.getElementById("customerAddress").innerHTML = responseObj.address;
+                        customerInfoComplete = true;
+                    } else {
+                        customerInfoComplete = false;
+                    }
+                    if (responseObj.hasOwnProperty("dob") && responseObj.dob != "") {
+                        document.getElementById("customerDob").innerHTML = responseObj.dob;
+                        if (isValidDate(responseObj.dob)) {
+                            customerInfoComplete = true;
+                        } else {
+                            customerInfoComplete = false;
+                        }
+                    }
+
+                    if (responseData.response.foundCustomer == 0) {
+                        document.getElementById('customerInfoFromDb').innerHTML = "Customer not found in database";
+                    } else {
+                        createTable(responseData.response.customerInfo, 'customerInfoFromDb');
+                        customerInfoContext = responseData.response.customerInfo;
+                    }
+                } catch (e) {
+                    console.log(`error in gettingcustomerinfo ${e}`);
+                }
+            } catch (error) {
+                // Handle any errors that occur during the process
+                console.error('Error fetching data:', error);
+            }
+        }
+
+
+        function deleteDiv(element) {
+            var divToDelete = element.parentNode;
+            divToDelete.parentNode.removeChild(divToDelete);
+        }
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
+        crossorigin="anonymous"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1"></script>
+
+    <script>
+        function createNewChart(id) {
+            const ctx = document.getElementById(`chart${id}`);
+            charts[id] = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Negative', 'Neutral', 'Positive'],
+                    datasets: [{
+                        data: [0, 0, 0],
+                        borderWidth: 1,
+                        backgroundColor: [
+                            'rgba(255, 0, 0, 0.8)',
+                            'rgba(255, 255, 255, 0.4)',
+                            'rgba(0, 255, 0, 0.8)'
+                        ]
+                    }]
+                },
+                options: {
+
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 1,
+                            display: false,
+                            gridLines: {
+                                display: false
+                            }
+                        },
+                        x: {
+                            display: false
+                        }
+                    },
+
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+        }
+
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,8 @@
+name,customer_id,current_product,churn_risk,customer_since,date_of_birth,address,preapproved_for_discount
+Jane Smith,102,AirSpeed Plus,0,2022-02-15,1985-09-22,Sample Street 1,"Yes, 10%"
+John Doe,101,AirSpeed Advanced,1,2022-01-01,1990-05-15,Sample Street 1,No
+Emily Davis,104,AirSpeed Plus,0,2022-04-10,1998-03-05,Sample Street 1,No
+Michael White,105,AirSpeed Home,1,2022-05-05,1989-07-20,Sample Street 1,No
+Sophia Taylor,106,AirSpeed Advanced,2,2022-06-18,1995-01-12,Sample Street 1,"Yes, 15%"
+Alex,13,AirSpeed Home,1,2022-01-01,1990-03-13,Sample Street 1,No
+Robert Johnson,103,AirSpeed Home,2,2022-03-20,1982-11-10,Sample Street 1,Yes 5%
