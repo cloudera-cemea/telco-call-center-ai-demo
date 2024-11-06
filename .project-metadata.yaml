@@ -10,7 +10,7 @@ prototype_version: "1.0"
 # -------------------------------------------------
 
 environment_variables:
-  DATA_CONNECTION_NAME:
+  SPARK_DATA_LAKE_CONNECTION:
     default: ""
     description: "Name of Spark Data Lake connection for demo data population. If you are not sure, contact the administrator of the workspace."
     required: true
@@ -30,14 +30,6 @@ environment_variables:
     default: ""
     description: Workload password of the Cloudera user deploying the project. Required to read/write data from/to the Data Lake.
     required: true
-  AI_MODEL_ACCESS_KEY:
-    default: ""
-    description: AI model access key/identifier. Autopopulated during deployment. Leave blank.
-    required: false
-  SENTINMENT_MODEL_ACCESS_KEY:
-    default: ""
-    description: Sentiment model access key/identifier. Autopopulated during deployment. Leave blank.
-    required: false
 
 # runtimes for all workloads
 # --------------------------

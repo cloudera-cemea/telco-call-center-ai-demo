@@ -6,7 +6,7 @@ import cml.data_v1 as cmldata
 from openai import OpenAI
 
 
-SPARK_DATA_LAKE_CONNECTION = os.getenv("SPARK_DATA_LAKE_CONNECTION_NAME")
+SPARK_DATA_LAKE_CONNECTION = os.getenv("SPARK_DATA_LAKE_CONNECTION")
 DEMO_DATABASE_NAME = os.getenv("DEMO_DATABASE_NAME")
 DEMO_TABLE_NAME = os.getenv("DEMO_TABLE_NAME")
 
