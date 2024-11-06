@@ -309,21 +309,17 @@
         // asynchronous function to get sentiment for text
         async function getSentimentForText(textInput, id) {
             try {
-                // Get the current timestamp in the required format
-                const currentTimestamp = new Date().toISOString();
 
                 // Create a JSON object with the required content, including the accessKey
                 const dataToSend = {
-                    "accessKey": "ms1cm6ibebv29xmy2xmdz3t9chbzifhy",
+                    "accessKey": "{{SENTIMENT_MODEL_ACCESS_KEY}}",
                     "request": {
-                        "created_at": currentTimestamp,
-                        "id": "999",
                         "text": textInput
                     }
                 };
 
                 // Make an asynchronous request using the fetch API
-                const response = await fetch('https://modelservice.ml-dbfc64d1-783.go01-dem.ylcu-atmi.cloudera.site/model', {
+                const response = await fetch('https://{{WORKSPACE_DOMAIN}}/model', {
                     method: 'POST',
                     headers: {
                         "Accept": "*/*",
@@ -374,14 +370,11 @@
             var textInput = `Here is the entire conversation: ${textOfEntireConversation}, and I need help with this section: ${textOfThatDiv}`
 
             try {
-                // Get the current timestamp in the required format
-                const currentTimestamp = new Date().toISOString();
 
                 // Create a JSON object with the required content, including the accessKey
                 const dataToSend = {
                     "accessKey": "{{AI_MODEL_ACCESS_KEY}}",
                     "request": {
-                        "created_at": currentTimestamp,
                         "text": textInput,
                         "task": "ai_help"
                     }
@@ -422,14 +415,11 @@
             var textInput = `Here is the entire conversation: ${textOfEntireConversation}, please summarize.`
 
             try {
-                // Get the current timestamp in the required format
-                const currentTimestamp = new Date().toISOString();
 
                 // Create a JSON object with the required content, including the accessKey
                 const dataToSend = {
                     "accessKey": "{{AI_MODEL_ACCESS_KEY}}",
                     "request": {
-                        "created_at": currentTimestamp,
                         "text": textInput,
                         "task": "summarize"
                     }
@@ -507,14 +497,11 @@
             var textInput = `Here is the entire conversation: ${textOfEntireConversation}.`
 
             try {
-                // Get the current timestamp in the required format
-                const currentTimestamp = new Date().toISOString();
 
                 // Create a JSON object with the required content, including the accessKey
                 const dataToSend = {
                     "accessKey": "{{AI_MODEL_ACCESS_KEY}}",
                     "request": {
-                        "created_at": currentTimestamp,
                         "text": textInput,
                         "task": "getCustomerInfo"
                     }

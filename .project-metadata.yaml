@@ -14,6 +14,10 @@ environment_variables:
     default: ""
     description: "Name of Spark Data Lake connection for demo data population. If you are not sure, contact the administrator of the workspace."
     required: true
+  WORKSPACE_DOMAIN:
+    default: ""
+    description: "Domain name of the CML Workspace, e.g. ml-996b99a7-dae.se-sandb.a465-9q4k.cloudera.site. If you are not sure, contact the administrator of the workspace."
+    required: true
   DEMO_DATABASE_NAME:
     default: "telco_call_center_ai"
     description: "Name of the database containing the demo data."
@@ -123,6 +127,14 @@ tasks:
 
   # frontent application deployment block
   # -------------------------------------
+
+  - type: run_session
+    name: Install application dependencies
+    code: |
+      !bash ./cdsw-build.sh
+    short_summary: Install application dependencies.
+    cpu: 2
+    memory: 4
 
   - type: start_application
     bypass_authentication: true

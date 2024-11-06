@@ -5,7 +5,8 @@ PORT = os.getenv('CDSW_APP_PORT', '8090')
 
 context = {
   "AI_MODEL_ACCESS_KEY": os.getenv("AI_MODEL_ACCESS_KEY"),
-  "SENTIMENT_MODEL_ACCESS_KEY": os.getenv("SENTIMENT_MODEL_ACCESS_KEY")  
+  "SENTIMENT_MODEL_ACCESS_KEY": os.getenv("SENTIMENT_MODEL_ACCESS_KEY"),
+  "WORKSPACE_DOMAIN": os.getenv("WORKSPACE_DOMAIN")
 }
 
 app = Flask(__name__)
