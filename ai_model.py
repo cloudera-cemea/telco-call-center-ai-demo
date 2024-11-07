@@ -3,6 +3,7 @@ import os
 from datetime import datetime
 
 import cml.data_v1 as cmldata
+from pyspark import SparkContext
 from openai import OpenAI
 
 
@@ -11,17 +12,36 @@ DEMO_DATABASE_NAME = os.getenv("DEMO_DATABASE_NAME")
 DEMO_TABLE_NAME = os.getenv("DEMO_TABLE_NAME")
 
 data_lake_connection = cmldata.get_connection(SPARK_DATA_LAKE_CONNECTION)
+SparkContext.setSystemProperty("spark.master", "local")
 spark = data_lake_connection.get_spark_session()
 
 # openai client
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 
-def retrieveCustomerInfo(name, dob, address):
+def retrieveCustomerInfo(name: str, dob: str, address: str) -> dict | bool:
+    """
+    Retrieve customer information from the database based on provided details.
 
-    # name = 'Alex'
-    # dob = '1990-03-13'
-    # address = 'Sample Street 1'
+    This function executes a SQL query to fetch customer details, using the
+    customer's name, date of birth, and address as filters. The query results
+    are returned as a dictionary mapping column names to their corresponding values.
+    If no matching records are found, the function returns False.
+
+    Example:
+        name = 'Alex'
+        dob = '1990-03-13'
+        address = 'Sample Street 1'
+
+    Parameters:
+        name (str): The name of the customer.
+        dob (str): The date of birth of the customer in 'YYYY-MM-DD' format.
+        address (str): The address of the customer.
+
+    Returns:
+        dict: A dictionary containing customer information if a match is found.
+        bool: False if no matching customer is found.
+    """
 
     sql_query = f"""
     SELECT
@@ -29,8 +49,8 @@ def retrieveCustomerInfo(name, dob, address):
         customer_id as Customer_ID,
         current_product as Current_Product,
         churn_risk as Churn_Risk,
-        TO_DATE(customer_since, 'yyyy-MM-dd') as Customer_Since,
-        TO_DATE(date_of_birth, 'yyyy-MM-dd') as Date_of_birth,
+        customer_since as Customer_Since,
+        date_of_birth as Date_of_birth,
         address as Address,
         preapproved_for_discount as Preappoved_for_discount
     FROM {DEMO_DATABASE_NAME}.{DEMO_TABLE_NAME}
@@ -41,15 +61,14 @@ def retrieveCustomerInfo(name, dob, address):
 
     results_dataframe = spark.sql(sql_query)
     results_values = results_dataframe.collect()
-    results_context = dict(zip(results_dataframe.columns, results_values))
-
-    if len(results_values) == 0:
-        return False
-    else:
+    if results_values:
+        results_context = dict(zip(results_dataframe.columns, results_values[0]))
         return results_context
+    else:
+        return False
 
 
-def is_valid_date(date_str):
+def is_valid_date(date_str: str):
     try:
         # Attempt to parse the string into a datetime object
         datetime.strptime(date_str, '%Y-%m-%d')
@@ -60,6 +79,29 @@ def is_valid_date(date_str):
 
 
 def predict(data: dict[str, str]) -> dict:
+    """
+    Predicts outcomes based on the provided task and text data using an AI model.
+
+    This function processes input data to perform specific tasks such as providing
+    AI assistance, summarizing conversations, or retrieving customer information.
+    It validates the input data, executes the appropriate task using the OpenAI
+    model, and returns the results in a structured format.
+
+    Parameters:
+        data (dict[str, str]): A dictionary containing 'text' and 'task' keys. The
+        'text' key holds the conversation text, and the 'task' key specifies the
+        operation to perform ('ai_help', 'summarize', or 'getCustomerInfo').
+
+    Returns:
+        dict: A dictionary containing the prediction results, which may include
+        recommendation text, customer information, and a flag indicating whether
+        customer information was found.
+        
+    Raises:
+        TypeError: If the input data is not a dictionary or lacks required keys,
+        or if the values for 'text' or 'task' are not strings.
+    """
+
     if not isinstance(data, dict):
         raise TypeError("data must be a dictionary")
     if "text" not in data:
