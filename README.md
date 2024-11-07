@@ -1,7 +1,7 @@
 # Telco Call Center AI Demo on Cloudera Machine Learning.
 
 ## Description
-The Telco Call Center AI Demo is a demonstration project showcasing the capabilities of Cloudera Machine Learning (CML) in a fictional telecommunications call center environment. This project simulates the integration of AI models to enhance customer service by retrieving customer information and assessing churn risk.
+The Telco Call Center AI Demo is a demonstration project designed to showcase the capabilities of Cloudera Machine Learning (CML) in a fictional telecommunications call center environment. It integrates AI models to enhance customer service by retrieving customer information and assessing churn risk. The project is set up using Cloudera Accelerated Machine Learning Projects (AMPs) and involves deploying a prototype, configuring environment variables, and accessing a web application. The application includes endpoints for sentiment analysis and LLM integration, and it uses a Flask-based frontend for user interaction. The project is configured through a .project-metadata.yaml file, which specifies deployment details and resource allocations.
 
 ## Installation
 To set up the Telco Call Center AI Demo using Cloudera Accelerated Machine Learning Projects (AMPs), follow these steps:
