@@ -14,9 +14,17 @@ environment_variables:
     default: ""
     description: "Name of Spark Data Lake connection for demo data population. If you are not sure, contact the administrator of the workspace."
     required: true
+  WORKLOAD_PASSWORD:
+    default: ""
+    description: Workload password of the Cloudera user deploying the project. Required to read/write data from/to the Data Lake.
+    required: true
   WORKSPACE_DOMAIN:
     default: ""
     description: "Domain name of the CML Workspace, e.g. ml-996b99a7-dae.se-sandb.a465-9q4k.cloudera.site. If you are not sure, contact the administrator of the workspace."
+    required: true
+  OPENAI_API_KEY:
+    default: ""
+    description: OpenAI API key for the model endpoint. Required.
     required: true
   DEMO_DATABASE_NAME:
     default: "telco_call_center_ai"
@@ -26,14 +34,6 @@ environment_variables:
     default: "customer_info"
     description: "Name of the table containing the demo data."
     required: false
-  OPENAI_API_KEY:
-    default: ""
-    description: OpenAI API key for the model endpoint. Required.
-    required: true
-  WORKLOAD_PASSWORD:
-    default: ""
-    description: Workload password of the Cloudera user deploying the project. Required to read/write data from/to the Data Lake.
-    required: true
 
 # runtimes for all workloads
 # --------------------------

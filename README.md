@@ -13,12 +13,13 @@ To set up the Telco Call Center AI Demo using Cloudera Accelerated Machine Learn
    - Follow the on-screen instructions to deploy the project. This will automatically configure the environment and set up the necessary resources as specified in the `project-metadata.yaml`.
 
 2. **Configure Environment Variables:**
-   - Ensure the following environment variables are set up in your project settings or through a `.env` file:
-     - `SPARK_DATA_LAKE_CONNECTION`: Name of the Spark Data Lake connection. Required.
-     - `OPENAI_API_KEY`: API key for OpenAI model access. Required.
+   - You will be prompted to provide the following environment variables when starting the deployment:
+     - `SPARK_DATA_LAKE_CONNECTION`: Name of Spark Data Lake connection for demo data population. If you are not sure, contact the administrator of the workspace. Required.
      - `WORKLOAD_PASSWORD`: Password for the Cloudera user deploying the project. Required.
-     - `DEMO_DATABASE_NAME`: Name of the database for demo data (default: `telco_call_center_ai`).
-     - `DEMO_TABLE_NAME`: Name of the table for demo data (default: `customer_info`).
+     - `WORKSPACE_DOMAIN`: Domain name of the Cloudera Machine Learning Workspace, e.g. ml-996b99a7-dae.se-sandb.a465-9q4k.cloudera.site. If you are not sure, contact the administrator of the workspace. Required.
+     - `OPENAI_API_KEY`: API key for OpenAI model access. Required.
+     - `DEMO_DATABASE_NAME`: Name of the database for demo data (default: `telco_call_center_ai`). Optional.
+     - `DEMO_TABLE_NAME`: Name of the table for demo data (default: `customer_info`). Optional.
 
 3. **Wait for the AMP deployment process to finish:**
    - The deployment process will take a few minutes to complete. You can monitor the progress in the Cloudera Machine Learning workspace. The following assets will be deployed during the process:
