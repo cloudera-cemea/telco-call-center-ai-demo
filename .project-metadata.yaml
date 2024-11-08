@@ -18,10 +18,6 @@ environment_variables:
     default: ""
     description: Workload password of the Cloudera user deploying the project. Required to read/write data from/to the Data Lake.
     required: true
-  WORKSPACE_DOMAIN:
-    default: ""
-    description: "Domain name of the CML Workspace, e.g. ml-996b99a7-dae.se-sandb.a465-9q4k.cloudera.site. If you are not sure, contact the administrator of the workspace."
-    required: true
   OPENAI_API_KEY:
     default: ""
     description: OpenAI API key for the model endpoint. Required.
@@ -117,9 +113,22 @@ tasks:
     examples:
       - request:
           task: ai_help
-          text: I am having troubles with my internet connection.
+          text: "Here is the entire conversation: I am having troubles with my internet connection."
         response:
           recommendationText: I'm sorry to hear that you're having trouble with your internet connection. Have you tried restarting your modem/router to see if that helps improve the connection?
+      - request:
+          task: getCustomerInfo
+          text: "Here is the entire conversation: name Alex address sample Street 1 date of birth March 13 1990."
+        response:
+          recommendationText: Customer information retrieved successfully.
+          foundCustomer: 1
+          customerInfo: "Name: Alex, Address: Sample Street 1, Date of Birth: 1990-03-13"
+      - request:
+          task: getCustomerInfo
+          text: "Here is the entire conversation: name Peter address Sample Street 2 date of birth January 1 2000."
+        response:
+          recommendationText: Unable to retrieve customer information.
+          foundCustomer: 0
 
   - type: deploy_model
     short_summary: deploy ai model

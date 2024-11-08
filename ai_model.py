@@ -1,18 +1,18 @@
 import json
 import os
 from datetime import datetime
+import logging
 
 import cml.data_v1 as cmldata
-from pyspark import SparkContext
 from openai import OpenAI
 
+logging.getLogger().setLevel(logging.INFO)
 
 SPARK_DATA_LAKE_CONNECTION = os.getenv("SPARK_DATA_LAKE_CONNECTION")
 DEMO_DATABASE_NAME = os.getenv("DEMO_DATABASE_NAME")
 DEMO_TABLE_NAME = os.getenv("DEMO_TABLE_NAME")
 
 data_lake_connection = cmldata.get_connection(SPARK_DATA_LAKE_CONNECTION)
-SparkContext.setSystemProperty("spark.master", "local")
 spark = data_lake_connection.get_spark_session()
 
 # openai client
@@ -43,6 +43,8 @@ def retrieveCustomerInfo(name: str, dob: str, address: str) -> dict | bool:
         bool: False if no matching customer is found.
     """
 
+    logging.info(f"retrieveCustomerInfo called with name: {name}, dob: {dob}, address: {address}.")
+
     sql_query = f"""
     SELECT
         name,
@@ -59,12 +61,16 @@ def retrieveCustomerInfo(name: str, dob: str, address: str) -> dict | bool:
     AND LOWER(address) = LOWER('{address}')
     """
 
+    logging.info(f"Attempting to run query: {sql_query}.")
+
     results_dataframe = spark.sql(sql_query)
     results_values = results_dataframe.collect()
     if results_values:
         results_context = dict(zip(results_dataframe.columns, results_values[0]))
+        logging.info(f"Customer information retrieved: {results_context}.")
         return results_context
     else:
+        logging.info(f"No matching customer found.")
         return False
 
 

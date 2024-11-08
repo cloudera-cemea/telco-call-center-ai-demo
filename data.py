@@ -1,7 +1,6 @@
 import os
 
 import cml.data_v1 as cmldata
-from pyspark import SparkContext
 from pyspark.sql.utils import AnalysisException
 
 
@@ -10,7 +9,6 @@ DEMO_DATABASE_NAME = os.getenv("DEMO_DATABASE_NAME")
 DEMO_TABLE_NAME = os.getenv("DEMO_TABLE_NAME")
 
 data_lake_connection = cmldata.get_connection(SPARK_DATA_LAKE_CONNECTION)
-SparkContext.setSystemProperty("spark.master", "local")
 spark = data_lake_connection.get_spark_session()
 
 # Check if data exists. If not, create it from local csv.
