@@ -112,23 +112,12 @@ tasks:
     kernel: python3
     examples:
       - request:
-          task: ai_help
-          text: "Here is the entire conversation: I am having troubles with my internet connection."
-        response:
-          recommendationText: I'm sorry to hear that you're having trouble with your internet connection. Have you tried restarting your modem/router to see if that helps improve the connection?
-      - request:
           task: getCustomerInfo
           text: "Here is the entire conversation: name Alex address sample Street 1 date of birth March 13 1990."
         response:
           recommendationText: Customer information retrieved successfully.
           foundCustomer: 1
           customerInfo: "Name: Alex, Address: Sample Street 1, Date of Birth: 1990-03-13"
-      - request:
-          task: getCustomerInfo
-          text: "Here is the entire conversation: name Peter address Sample Street 2 date of birth January 1 2000."
-        response:
-          recommendationText: Unable to retrieve customer information.
-          foundCustomer: 0
 
   - type: deploy_model
     short_summary: deploy ai model
