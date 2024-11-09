@@ -14,7 +14,7 @@ To set up the Telco Call Center AI Demo using Cloudera Accelerated Machine Learn
 
 2. **Configure Environment Variables:**
    - You will be prompted to provide the following environment variables when starting the deployment:
-     - `SPARK_DATA_LAKE_CONNECTION`: Name of Spark Data Lake connection for demo data population. If you are not sure, contact the administrator of the workspace. Required.
+     - `SPARK_DATA_LAKE_CONNECTION`: Name of Spark Data Lake connection for loading demo data. If you are not sure, contact the administrator of the workspace. Required.
      - `WORKLOAD_PASSWORD`: Password for the Cloudera user deploying the project. Required.
      - `OPENAI_API_KEY`: API key for OpenAI model access. Required.
      - `DEMO_DATABASE_NAME`: Name of the database for demo data (default: `telco_call_center_ai`). Optional.
@@ -22,10 +22,10 @@ To set up the Telco Call Center AI Demo using Cloudera Accelerated Machine Learn
 
 3. **Wait for the AMP deployment process to finish:**
    - The deployment process will take a few minutes to complete. You can monitor the progress in the Cloudera Machine Learning workspace. The following assets will be deployed during the process:
-     - Population of demo data.
+     - Setup of demo data.
      - Model endpoint for sentiment analysis.
      - Model endpoint for LLM integration and customer information retrieval.
-     - Frontend aplication for user interaction with web speech API.
+     - Frontend aplication for user interaction with web speech API and model endpoints.
 
 4. **Access the application in your web browser:**
     - Once the deployment is complete, you can access the application by navigating to the URL provided in the Cloudera Machine Learning workspace. The frontend application will be accessible under Applications.
@@ -35,7 +35,6 @@ To set up the Telco Call Center AI Demo using Cloudera Accelerated Machine Learn
 - Integration with Spark Data Lake for data management.
 - LLM model integration for customer information retrieval.
 - Flask web application for user interaction.
-- Demonstrates data population and retrieval in a call center scenario.
 
 # Contributing
 We welcome contributions! Please fork the repository and open a pull request.

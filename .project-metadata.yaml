@@ -12,7 +12,7 @@ prototype_version: "1.0"
 environment_variables:
   SPARK_DATA_LAKE_CONNECTION:
     default: ""
-    description: "Name of Spark Data Lake connection for demo data population. If you are not sure, contact the administrator of the workspace."
+    description: "Name of Spark Data Lake connection for loading demo data. If you are not sure, contact the administrator of the workspace."
     required: true
   WORKLOAD_PASSWORD:
     default: ""
