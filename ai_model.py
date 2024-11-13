@@ -19,7 +19,7 @@ spark = data_lake_connection.get_spark_session()
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 
-def retrieveCustomerInfo(name: str, dob: str, address: str) -> dict | bool:
+def retrieveCustomerInfo(name: str, dob: str, address: str):
     """
     Retrieve customer information from the database based on provided details.
 
