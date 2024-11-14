@@ -8,12 +8,11 @@ from openai import OpenAI
 
 logging.getLogger().setLevel(logging.INFO)
 
-SPARK_DATA_LAKE_CONNECTION = os.getenv("SPARK_DATA_LAKE_CONNECTION")
+IMPALA_DATA_CONNECTION = os.getenv("IMPALA_DATA_CONNECTION")
 DEMO_DATABASE_NAME = os.getenv("DEMO_DATABASE_NAME")
 DEMO_TABLE_NAME = os.getenv("DEMO_TABLE_NAME")
 
-data_lake_connection = cmldata.get_connection(SPARK_DATA_LAKE_CONNECTION)
-spark = data_lake_connection.get_spark_session()
+conn = cmldata.get_connection(IMPALA_DATA_CONNECTION)
 
 # openai client
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
@@ -63,15 +62,15 @@ def retrieveCustomerInfo(name: str, dob: str, address: str):
 
     logging.info(f"Attempting to run query: {sql_query}.")
 
-    results_dataframe = spark.sql(sql_query)
-    results_values = results_dataframe.collect()
-    if results_values:
-        results_context = dict(zip(results_dataframe.columns, results_values[0]))
-        logging.info(f"Customer information retrieved: {results_context}.")
-        return results_context
-    else:
+    results_dataframe = conn.get_pandas_dataframe(sql_query)
+
+    if results_dataframe.empty:
         logging.info(f"No matching customer found.")
         return False
+    else:
+        results_context = dict(results_dataframe.iloc[0])
+        logging.info(f"Customer information retrieved: {results_context}.")
+        return results_context
 
 
 def is_valid_date(date_str: str):

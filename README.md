@@ -14,7 +14,8 @@ To set up the Telco Call Center AI Demo using Cloudera Accelerated Machine Learn
 
 2. **Configure Environment Variables:**
    - You will be prompted to provide the following environment variables when starting the deployment:
-     - `SPARK_DATA_LAKE_CONNECTION`: Name of Spark Data Lake connection for loading demo data. If you are not sure, contact the administrator of the workspace. Required.
+     - `SPARK_DATA_LAKE_CONNECTION`: Name of Spark Data Lake connection for loading demo data (default: `go01-aw-dl`). If you are not sure, contact the administrator of the workspace. Required.
+     - `IMPALA_DATA_CONNECTION`: Name of the data connection to Impala Virtual Warehouse for demo data retrieval (default: `default-impala-aws`). If you are not sure, contact the administrator of the workspace. Required.
      - `WORKLOAD_PASSWORD`: Password for the Cloudera user deploying the project. Required.
      - `OPENAI_API_KEY`: API key for OpenAI model access. Required.
      - `DEMO_DATABASE_NAME`: Name of the database for demo data (default: `telco_call_center_ai`). Optional.

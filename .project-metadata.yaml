@@ -11,9 +11,13 @@ prototype_version: "1.0"
 
 environment_variables:
   SPARK_DATA_LAKE_CONNECTION:
-    default: ""
+    default: "go01-aw-dl"
     description: "Name of Spark Data Lake connection for loading demo data. If you are not sure, contact the administrator of the workspace."
     required: true
+  IMPALA_DATA_CONNECTION:
+    default: "default-impala-aws"
+    description: Name of the data connection to Impala Virtual Warehouse for demo data retrieval. If you are not sure, contact the administrator of the workspace. Required
+    requried: true
   WORKLOAD_PASSWORD:
     default: ""
     description: Workload password of the Cloudera user deploying the project. Required to read/write data from/to the Data Lake.
@@ -38,7 +42,7 @@ runtimes:
   - editor: JupyterLab
     kernel: Python 3.9
     edition: Standard
-    version: "2024.10"
+    version: "2024.10" # results in metastore instance already deployed error
     addons:
       - Spark 3.1.1 - CDP 7.2.11 - CDE 1.13 - HOTFIX-2
 
