@@ -44,7 +44,7 @@ runtimes:
     edition: Standard
     version: "2024.10" # results in metastore instance already deployed error
     addons:
-      - Spark 3.1.1 - CDP 7.2.11 - CDE 1.13 - HOTFIX-2
+      - Spark 3.2.3 - CDE 1.20.3 - HOTFIX-2
 
 tasks:
 
@@ -139,7 +139,7 @@ tasks:
   - type: start_application
     bypass_authentication: true
     subdomain: telco-call-center-ai
-    static_subdomain: true
+    static_subdomain: false
     script: webapp.py
     kernel: python3
     cpu: 4
