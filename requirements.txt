@@ -3,3 +3,4 @@ torch==1.13.1
 openai==1.8.0
 Flask==3.0.1
 pandas==2.1.4
+pyspark==3.2.3
