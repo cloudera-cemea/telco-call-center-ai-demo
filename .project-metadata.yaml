@@ -11,11 +11,11 @@ prototype_version: "1.0"
 
 environment_variables:
   SPARK_DATA_LAKE_CONNECTION:
-    default: "go01-aw-dl"
-    description: "Name of Spark Data Lake connection for loading demo data. If you are not sure, contact the administrator of the workspace."
+    default: go01-aw-dl
+    description: Name of Spark Data Lake connection for loading demo data. If you are not sure, contact the administrator of the workspace.
     required: true
   IMPALA_DATA_CONNECTION:
-    default: "default-impala-aws"
+    default: default-impala-aws
     description: Name of the data connection to Impala Virtual Warehouse for demo data retrieval. If you are not sure, contact the administrator of the workspace. Required
     requried: true
   WORKLOAD_PASSWORD:
@@ -27,12 +27,12 @@ environment_variables:
     description: OpenAI API key for the model endpoint. Required.
     required: true
   DEMO_DATABASE_NAME:
-    default: "telco_call_center_ai"
-    description: "Name of the database containing the demo data."
+    default: telco_call_center_ai
+    description: Name of the database containing the demo data.
     required: false
   DEMO_TABLE_NAME:
     default: "customer_info"
-    description: "Name of the table containing the demo data."
+    description: Name of the table containing the demo data.
     required: false
 
 # runtimes for all workloads
@@ -42,7 +42,7 @@ runtimes:
   - editor: JupyterLab
     kernel: Python 3.9
     edition: Standard
-    version: "2024.10" # results in metastore instance already deployed error
+    version: "2024.10"
     addons:
       - Spark 3.2.3 - CDE 1.20.3 - HOTFIX-2
 
